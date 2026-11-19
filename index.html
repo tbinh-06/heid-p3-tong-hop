@@ -41,6 +41,9 @@ td ul{padding-left:18px}td li{margin:1px 0}
 .dec{display:inline-block;font:600 13px Lexend,sans-serif;border-radius:999px;padding:3px 12px;margin:2px 0}
 .d-ok{background:var(--ok-s);color:var(--ok)}
 .t-rc{background:#fde7e5;color:#b42318}.t-c{background:var(--warn-s);color:var(--warn)}.t-nc{background:var(--grey-s);color:var(--muted)}
+.fms{margin-top:22px}.fms h2{font:700 20px "Plus Jakarta Sans",sans-serif;margin-bottom:4px}.fms .hint{margin-bottom:10px}
+.c-ht{width:300px}.fl2{padding-left:18px;margin-bottom:2px}
+.c-ht .ht{display:block;border:0;padding:0;margin:0}.c-ht .ht .opt{flex-direction:column;gap:4px}.c-ht .ht .hx,.c-ht .ht .hg{margin-top:6px}
 .hts{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-top:18px}
 .hts h2{font:700 18px "Plus Jakarta Sans",sans-serif}
 .ht{display:grid;grid-template-columns:minmax(200px,1.1fr) 2fr;gap:6px 18px;padding:12px 0;border-top:1px solid var(--line);align-items:center}
@@ -49,7 +52,7 @@ td ul{padding-left:18px}td li{margin:1px 0}
 .ht .opt{display:flex;flex-wrap:wrap;gap:6px 16px}
 .ht label{display:flex;align-items:center;gap:6px;font:500 13.5px Lexend,sans-serif;cursor:pointer}
 .ht input[type=radio]{width:18px;height:18px;accent-color:var(--ok);cursor:pointer}
-.ht .hx{display:none;grid-column:2}.ht.khac .hx{display:block}
+.ht .hx{display:none;grid-column:2}.ht.need .hx{display:block}
 .ht .hg{grid-column:2}
 .ht input[type=url],.ht input[type=text]{width:100%;font:400 13.5px Lexend,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .ht input:focus-visible{outline:3px solid var(--blue);outline-offset:1px}
@@ -99,8 +102,8 @@ const STEPS=[
  ['tbody tr:first-child td:nth-child(2)','Nội dung báo cáo','Các trang trong báo cáo, phòng cùng dùng, nguồn dữ liệu và biểu mẫu phòng cần nhập để có số liệu.'],
  ['tbody tr:first-child td:nth-child(3)','P. Công nghệ & GP đã xác nhận','Báo cáo đã được chốt làm trong Phase 3 và mức ưu tiên.'],
  ['tbody tr:first-child td:nth-child(4)','Phòng xác nhận báo cáo','Chọn Đồng ý, hoặc Ý kiến khác rồi ghi ý kiến, cho từng báo cáo.'],
- ['.cf2.sm','Phòng xác nhận biểu mẫu','Mỗi biểu mẫu trong cột Nội dung cũng có ô xác nhận riêng: Đồng ý hoặc Ý kiến khác.'],
- ['#hts','Hiện trạng biểu mẫu','Chọn biểu mẫu đang được dùng thế nào: đang sử dụng, dùng mẫu khác (đính kèm link) hay chưa có mẫu. Base dùng để đánh giá mức độ sẵn sàng dữ liệu.'],
+ ['#fms tbody tr:first-child td:nth-child(3)','Phòng xác nhận biểu mẫu','Chọn Đồng ý nếu phòng làm biểu mẫu này, hoặc Ý kiến khác rồi ghi ý kiến.'],
+ ['#fms tbody tr:first-child td:nth-child(4)','Mức độ sẵn sàng','Chọn biểu mẫu đang được dùng thế nào. Đang sử dụng hoặc dùng mẫu khác thì dán link biểu mẫu vào ô hiện ra.'],
  ['#wnote','Ghi chú chung','Ý kiến chung cho cả phạm vi, nếu có.'],
  ['.sign','Gửi xác nhận','Nhập người xác nhận, chức danh rồi bấm Gửi xác nhận. Base nhận được ngay.']];
 const tsh=document.getElementById('tsh'),tip=document.getElementById('ttip'),tnext=document.getElementById('tnext'),tprev=document.getElementById('tprev');
@@ -132,9 +135,10 @@ CFS.forEach(c=>{const t=c.querySelector('textarea');t.value=(S[c.dataset.key]||{
   c.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',()=>{S[c.dataset.key]=Object.assign({},S[c.dataset.key],{v:r.value});save();paintC(c);if(r.value==='adj')t.focus();}));
   t.addEventListener('input',()=>{S[c.dataset.key]=Object.assign({},S[c.dataset.key],{nt:t.value});save();});});
 const HTS=[...document.querySelectorAll('.ht')];
-function paintH(h){const x=S['ht:'+h.dataset.key]||{};h.querySelectorAll('input[type=radio]').forEach(r=>r.checked=r.value===x.v);h.classList.toggle('khac',x.v==='khac');}
+const needL=(h,v)=>v==='khac'||(v==='dang'&&h.dataset.haslink!=='1');
+function paintH(h){const x=S['ht:'+h.dataset.key]||{};h.querySelectorAll('input[type=radio]').forEach(r=>r.checked=r.value===x.v);h.classList.toggle('need',needL(h,x.v));}
 HTS.forEach(h=>{const k='ht:'+h.dataset.key,l=h.querySelector('.hl'),g=h.querySelector('.hg'),x=S[k]||{};l.value=x.link||'';g.value=x.nt||'';paintH(h);
-  h.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',()=>{S[k]=Object.assign({},S[k],{v:r.value});save();paintH(h);if(r.value==='khac')l.focus();}));
+  h.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',()=>{S[k]=Object.assign({},S[k],{v:r.value});save();paintH(h);if(needL(h,r.value))l.focus();}));
   l.addEventListener('input',()=>{S[k]=Object.assign({},S[k],{link:l.value});save();});
   g.addEventListener('input',()=>{S[k]=Object.assign({},S[k],{nt:g.value});save();});});
 const HTL={dang:'Đang sử dụng',khac:'Dùng mẫu khác',chua:'Chưa có mẫu'};
@@ -151,12 +155,12 @@ btn.addEventListener('click',async()=>{
   if(noNote.length){msg.className='err';msg.textContent='Ghi ý kiến cho mục đã chọn Ý kiến khác.';noNote[0].querySelector('textarea').focus();return;}
   const hm=HTS.filter(h=>!(S['ht:'+h.dataset.key]||{}).v);
   if(hm.length){msg.className='err';msg.textContent='Còn '+hm.length+' biểu mẫu chưa xác nhận hiện trạng.';hm[0].scrollIntoView({block:'center',behavior:'smooth'});hm[0].querySelector('input').focus({preventScroll:true});return;}
-  const hl=HTS.filter(h=>{const x=S['ht:'+h.dataset.key]||{};return x.v==='khac'&&!/^https?:\/\/\S+/.test((x.link||'').trim());});
-  if(hl.length){msg.className='err';msg.textContent='Đính kèm link cho biểu mẫu đang dùng mẫu khác.';hl[0].querySelector('.hl').focus();return;}
+  const hl=HTS.filter(h=>{const x=S['ht:'+h.dataset.key]||{};return needL(h,x.v)&&!/^https?:\/\/\S+/.test((x.link||'').trim());});
+  if(hl.length){msg.className='err';msg.textContent='Đính kèm link cho biểu mẫu đang sử dụng hoặc dùng mẫu khác.';hl[0].querySelector('.hl').focus();return;}
   if(!ENDPOINT||ENDPOINT.indexOf('http')!==0){msg.className='err';msg.textContent='Trang chưa được cấu hình địa chỉ nhận xác nhận.';return;}
   const data={phong:document.body.dataset.name,nguoi:name,chucdanh:document.getElementById('wr').value.trim(),ghichu:document.getElementById('wnote').value.trim(),
     muc:CFS.map(c=>{const x=S[c.dataset.key]||{};return {loai:c.dataset.type,ma:c.dataset.key,ten:c.dataset.label,ketqua:x.v==='ok'?'Đồng ý':'Ý kiến khác',ykien:x.v==='adj'?(x.nt||''):''};}),
-    hientrang:HTS.map(h=>{const x=S['ht:'+h.dataset.key]||{};return {ma:h.dataset.key,ten:h.dataset.label,trangthai:HTL[x.v]||'',link:x.v==='khac'?(x.link||'').trim():'',ghichu:(x.nt||'').trim()};})};
+    hientrang:HTS.map(h=>{const x=S['ht:'+h.dataset.key]||{};return {ma:h.dataset.key,ten:h.dataset.label,trangthai:HTL[x.v]||'',link:needL(h,x.v)?(x.link||'').trim():'',ghichu:(x.nt||'').trim()};})};
   btn.disabled=true;msg.className='';msg.textContent='Đang gửi…';
   try{await fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
     const n=data.muc.filter(m=>m.ketqua==='Đồng ý').length;msg.textContent='Đã gửi xác nhận: '+n+'/'+data.muc.length+' mục đồng ý. Cảm ơn anh/chị.';S._sent=new Date().toISOString();save();}
